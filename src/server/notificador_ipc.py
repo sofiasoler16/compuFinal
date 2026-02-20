@@ -50,7 +50,7 @@ def iniciar_notificador(cola_ipc):
             mensaje_alerta = datos_alerta["mensaje"]
             
             # ---> ALERTA POR TERMINAL (Siempre ocurre de forma inmediata) <---
-            print(f"🖥️ [TERMINAL] Alerta en tiempo real -> {mensaje_alerta}")
+            # print(f"🖥️ [TERMINAL] Alerta en tiempo real -> {mensaje_alerta}")
 
             # ---> REGISTRAR PARA EL CORREO (Agrupación) <---
             if caballo not in agrupador:
