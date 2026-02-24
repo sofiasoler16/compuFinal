@@ -25,7 +25,7 @@ def iniciar_worker(id_worker, cola_tareas, cola_ipc, lock_db, historial, lock_me
             alertas_actuales.append(f"Fiebre ({temp}°C)")
 
         # 2. REGLA CON ESTADO (Revolcadas y Filtro de Alertas)
-        with lock_memoria:
+        with lock_memoria: #with lock = lock.acquire
             if caballo not in historial:
                 # Agregamos "ultimo_aviso" para saber cuándo le hablamos al Notificador por última vez
                 historial[caballo] = {"revolcadas": 0, "inicio_ventana": time.time(), "ultimo_aviso": 0}

@@ -40,10 +40,10 @@ def iniciar_sensor(host, port, id_caballo, modo, intervalo):
                 datos = simular_datos(id_caballo, modo)
                 
                 # 2. Convertir el diccionario a JSON y luego a bytes
-                mensaje = json.dumps(datos) + "\n"
+                mensaje = json.dumps(datos) + "\n" #Convierte objeto python en string json. Porque...
                 
                 # 3. Enviar por el socket
-                s.sendall(mensaje.encode('utf-8'))
+                s.sendall(mensaje.encode('utf-8')) #Convierte mensaje en bytes para el socket. SOCKET TCP envia y recibe Bytes. 
                 print(f"[{id_caballo}] Datos enviados: {datos['bpm']} lpm, {datos['temperatura']}°C, {datos['actividad']}")
                 
                 # 4. Esperar hasta el próximo envío

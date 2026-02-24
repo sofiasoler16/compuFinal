@@ -20,7 +20,7 @@ async def main(host, port):
     cola_tareas = queue.Queue()        
     lock_db = threading.Lock()         
     
-    # NUEVO: Memoria compartida y su Lock para que los hilos no choquen
+    # Memoria compartida y su Lock para que los hilos no choquen
     historial_caballos = {}
     lock_memoria = threading.Lock() 
 
@@ -30,28 +30,28 @@ async def main(host, port):
     p_notificador.start()
 
     # 3. Levantar el Pool de Hilos (Threads Workers)
-    num_hilos = 3  
+    num_hilos = 3 # Mejor por argumento o por archivo  
     for i in range(num_hilos):
         # Le pasamos el historial y el lock de memoria a cada hilo
-        t = threading.Thread(target=iniciar_worker, args=(i+1, cola_tareas, cola_ipc, lock_db, historial_caballos, lock_memoria)) # <--- CAMBIADO A iniciar_worker
+        t = threading.Thread(target=iniciar_worker, args=(i+1, cola_tareas, cola_ipc, lock_db, historial_caballos, lock_memoria)) 
         t.daemon = True
         t.start()
 
     # 4. Iniciar el Servidor de Sockets (AsyncIO)
-    # El gateway se queda corriendo infinitamente
+    # El servidor se queda corriendo 
     await iniciar_gateway(host, port, cola_tareas)
 
 if __name__ == '__main__':
     # Configuración de argumentos por línea de comandos ---
     parser = argparse.ArgumentParser(description="Servidor Orquestador - HorseWatch")
-    parser.add_argument("--host", type=str, default="127.0.0.1", help="Host donde escuchará el servidor")
+    parser.add_argument("--host", type=str, default="127.0.0.1", help="Host donde escuchará el servidor") # Escuchar IPv4 / IPv6
     parser.add_argument("--port", type=int, default=8888, help="Puerto donde escuchará el servidor")
     
     args = parser.parse_args()
-    # ----------------------------------------------------------------
+
 
     try:
-        # Le pasamos los argumentos parseados a la función main asincrónica
+        # Pasa los argumentos parseados a la función main asincrónica
         asyncio.run(main(args.host, args.port))
     except KeyboardInterrupt:
         print("\n[Main] Apagando el servidor HorseWatch...")
