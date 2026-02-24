@@ -4,6 +4,7 @@ import threading
 import queue
 import sys
 import time
+import argparse
 
 # Importaciones
 from gateway_async import iniciar_gateway
@@ -11,7 +12,7 @@ from workers_hilos import iniciar_worker
 from notificador_ipc import iniciar_notificador
 
 
-async def main():
+async def main(host, port):
     print("Iniciando Sistema Distribuido HorseWatch...\n")
 
     # 1. Crear los mecanismos de sincronización y comunicación
@@ -37,16 +38,21 @@ async def main():
         t.start()
 
     # 4. Iniciar el Servidor de Sockets (AsyncIO)
-    host = "127.0.0.1"
-    port = 8888
-    
     # El gateway se queda corriendo infinitamente
     await iniciar_gateway(host, port, cola_tareas)
 
 if __name__ == '__main__':
+    # Configuración de argumentos por línea de comandos ---
+    parser = argparse.ArgumentParser(description="Servidor Orquestador - HorseWatch")
+    parser.add_argument("--host", type=str, default="127.0.0.1", help="Host donde escuchará el servidor")
+    parser.add_argument("--port", type=int, default=8888, help="Puerto donde escuchará el servidor")
+    
+    args = parser.parse_args()
+    # ----------------------------------------------------------------
+
     try:
-        # Arranca el bucle de eventos asincrónico
-        asyncio.run(main())
+        # Le pasamos los argumentos parseados a la función main asincrónica
+        asyncio.run(main(args.host, args.port))
     except KeyboardInterrupt:
         print("\n[Main] Apagando el servidor HorseWatch...")
         sys.exit(0)

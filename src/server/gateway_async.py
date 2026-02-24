@@ -2,34 +2,46 @@ import asyncio
 import json
 import functools
 
-async def manejar_cliente(reader, writer, cola_tareas):
     """
     Corrutina que maneja la conexión individual de cada sensor.
     Es asincrónica, por lo que puede atender a miles de caballos a la vez.
     """
-    direccion = writer.get_extra_info('peername')
+
+    """
+    No es multiprocessing porque: rear un Proceso nuevo (aislado y con su propia memoria) 
+    a nivel del sistema operativo es un recurso 'caro' y pesado. Si tuviéramos 1000 caballos 
+    conectados al mismo tiempo, la computadora intentaría levantar 1000 procesos distintos
+     y se quedaría sin memoria RAM instantáneamente.
+
+    No es multithreading porque: asignar un Hilo (Thread) a cada sensor también es ineficiente 
+    para tareas de red. Las conexiones de red son I/O Bound (limitadas por entrada/salida,
+    es decir, son lentas). Si un caballo tiene mala señal y tarda en dictar sus síntomas,
+    el Hilo se quedaría 'congelado' esperando, bloqueando recursos.
+    """
+
+async def manejar_cliente(reader, writer, cola_tareas): # Definir funcion con comportamiento async
+
+    direccion = writer.get_extra_info('peername') # De que puerto e IP entro el nuevo sensor que lee reader
     print(f"[Gateway] Nueva conexión desde el sensor en {direccion}")
 
     try:
         while True:
-            # await: Permite que Python atienda a otros caballos mientras este envía datos
-            data = await reader.readline()
+            # await: Pone en espera para un sensor y escucha otros si ya no dice nada
+            data = await reader.readline() # reader.readline(): escuchar hasta un Enter
             
             if not data:
                 break # El sensor cerró la conexión
 
-            mensaje_texto = data.decode().strip()
+            mensaje_texto = data.decode().strip() # Deja limpio para leer
             
             try:
-                # Convertimos el texto recibido a un diccionario de Python
+                # Texto recibido a un diccionario de Python
                 paquete = json.loads(mensaje_texto)
                 
-                if paquete.get("action") == "telemetry":
-                    # Metemos los datos del caballo en la cola para los Workers.
+                if paquete.get("action") == "telemetry":   # Por que telemetry? De donde lo saca?
+                    # Manda los datos del caballo en la cola para los Workers.
                     # El Gateway se desentiende rápido y vuelve a escuchar.
                     cola_tareas.put(paquete)
-                    # Opcional: imprimir para ver que está recibiendo
-                    # print(f"[Gateway] Telemetría recibida de {paquete.get('id_caballo')}")
                 else:
                     print(f"[Gateway] Acción desconocida: {paquete.get('action')}")
 
