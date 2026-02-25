@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # 1. El Servidor Central (Gateway Async + Hilos + IPC)
+  backend:
+    build: .
+    command: python src/server/main.py --host 0.0.0.0 --port 8888
+    ports:
+      - "8888:8888" # Exponemos el puerto para que los sensores se puedan conectar
+    volumes:
+      - ./src/db:/app/src/db # ¡CLAVE! Compartimos la base de datos física con el contenedor
+
+  # 2. El Servidor Web (El Dashboard de Flask)
+  web:
+    build: .
+    command: python src/web/servidor_web.py
+    ports:
+      - "5000:5000" # Exponemos el puerto de la web al navegador
+    volumes:
+      - ./src/db:/app/src/db # También lee la misma base de datos
+    depends_on:
+      - backend # Espera a que el backend arranque primero
+
+  # 3. El Monitor de Logs (Tu app de terminal adaptada)
+  logs_monitor:
+    build: .
+    command: python src/client/app_veterinario.py
+    volumes:
+      - ./src/db:/app/src/db
+    depends_on:
+      - backend

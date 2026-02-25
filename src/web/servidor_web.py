@@ -10,7 +10,7 @@ RUTA_DB = "src/db/horsewatch.db"
 
 @app.route('/')
 def inicio():
-    """Página de inicio súper simple."""
+    """Página de inicio."""
     return '''
     <h1>🐴 Panel Clínico - HorseWatch</h1>
     <p>Para ver el gráfico en vivo, hacé clic en el caballo:</p>
